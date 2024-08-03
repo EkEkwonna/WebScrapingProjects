@@ -67,18 +67,4 @@ News Article Title | Article URL Link | Created Date | Author(s)
 df=pd.DataFrame(articleLinks,columns=['Title','URL','Created Date','Author(s)'])
 print(df.head())
 
-# df.to_csv('BBC-NEWS-ARTICLE-DATA.csv')
-
-
-
-
-
-# article = browser.find_element(By.XPATH,"//a[@class = 'ssrcss-its5xf-PromoLink exn3ah91']")
-# article_title = browser.find_element(By.XPATH,"//a[@class = 'ssrcss-its5xf-PromoLink exn3ah91']").text
-# article_link = browser.find_element(By.XPATH,"//a[@class = 'ssrcss-its5xf-PromoLink exn3ah91']").get_attribute('href')
-
-# tag = browser.find_element(By.XPATH,"//a[@class = 'ssrcss-1t4pp0s-MetadataLink e4wm5bw2']")
-# tag_title = browser.find_element(By.XPATH,"//a[@class = 'ssrcss-1t4pp0s-MetadataLink e4wm5bw2']").text
-# tag_link = browser.find_element(By.XPATH,"//a[@class = 'ssrcss-1t4pp0s-MetadataLink e4wm5bw2']").get_attribute('href')
-
-# print(" | ",article_title, " | ",article_link, " | ", tag_title ," | ", tag_link)
+df.to_csv('BBC-NEWS-ARTICLE-DATA.csv')
