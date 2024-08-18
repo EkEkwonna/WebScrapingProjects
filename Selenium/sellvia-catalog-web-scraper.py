@@ -16,11 +16,14 @@ options = Options()
 options.headless = True
 
 browser = webdriver.Firefox(options = options)
-browser.get('https://sellviacatalog.com/product/1660119')
+browser.get('https://sellviacatalog.com/hot')
+
+hot_items=[item.get_attribute('href') for item in browser.find_elements(By.XPATH,"//a[contains(@href,'/product')]")]
+data = []
 
 def extract_images():
     image_array=[]
-    first_image = browser.find_element(By.XPATH,"//img[@class='makezoom']").get_attribute('src')
+    first_image = browser.find_element(By.XPATH,"//img[@class='makezoom']").get_attribute('data-zoom-image')
     image_array.append(first_image)
     current_image = 0
     while current_image != first_image:
@@ -40,7 +43,12 @@ def scrape_elements():
     row = [product_title,description,images,processing_time]
     return row
 
-data = [scrape_elements()]
+
+for item in hot_items:
+    browser.get(item)
+    data.append(scrape_elements())
+    
+print(data)
 
 df=pd.DataFrame(data,columns=['Title','Description','Images','Processing Time'])
 
