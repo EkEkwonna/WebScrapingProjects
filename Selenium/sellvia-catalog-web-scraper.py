@@ -118,7 +118,7 @@ def scrape_elements(product_code):
 for item in range(1660119,1660110,-1):
     scrape_elements(item)
 
-df=pd.DataFrame(data,columns=['Title','Description','Display Price','Retail Price','Shipping and Handling','Size','Color','Type',
+df=pd.DataFrame(data,columns=['Title','Description','Display Price USD($)','Retail Price USD($)','Processing Time','Shipping and Handling USD ($)','Size','Color','Type',
                               'Image_1','Image_2','Image_3','Image_4','Image_5','Image_6','Image_7','Image_8','Image_9','Image_10',
                               'Image_11','Image_12','Image_13','Image_14','Image_15',
                               'Processing Time','In Stock',
