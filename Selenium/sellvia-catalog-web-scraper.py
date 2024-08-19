@@ -94,14 +94,19 @@ def scrape_elements(product_code):
     print('Exctracting for product:',str(product_code))
     available_options = [item.text for item in browser.find_elements(By.XPATH,"//span[contains(@class,'js-sku-set meta-item meta-item-text is-not-empty')]")]
     if len(available_options) <=1 :
-        data_entry = extract_all_details()
-        data.append(data_entry)
+        try:
+            data_entry = extract_all_details()
+            data.append(data_entry)
+        except Exception as Err:
+            print(Err)
     else:
         for option in available_options:
             button = browser.find_element(By.XPATH,f"//span[contains(@data-title,'{option}')]").click()
-            data_entry = extract_all_details()
-            data.append(data_entry)
-
+            try:
+                data_entry = extract_all_details()
+                data.append(data_entry)
+            except Exception as Err:
+                print(Err)
         return
     
 
