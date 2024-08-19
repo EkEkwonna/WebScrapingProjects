@@ -40,7 +40,7 @@ def extract_hidden_fields():
 
     "maximum number of hidden fields is 24 with the following keys"
     keys = ['post_id','currency','_price','_price_nc','_save','_save_nc','stock','savePercent','_salePrice','_salePrice_nc',
-     'price','salePrice','save','single_shipping_price','currency_shipping','variation_default','shipping']
+     'price','salePrice','save','single_shipping_price','currency_shipping','variation_default','shipping','sku-meta','sku-meta-set[]']
     for key in keys:
         if key in hidden_fields_dictionary.keys():
             output.append(hidden_fields_dictionary[key])
@@ -127,7 +127,7 @@ df=pd.DataFrame(data,columns=['Title','Description','Display Price USD($)','Reta
                               'Processing Time','In Stock',
                               #hidden_fields
                               'post_id','currency','_price','_price_nc','_save','_save_nc','stock','savePercent','_salePrice','_salePrice_nc',
-                                'price','salePrice','save','single_shipping_price','currency_shipping','variation_default','shipping'])
+                                'price','salePrice','save','single_shipping_price','currency_shipping','variation_default','shipping','sku-meta','sku-meta-set[]'])
 
 df.to_csv('sellvia-catalog-products.csv',index=False)
 
