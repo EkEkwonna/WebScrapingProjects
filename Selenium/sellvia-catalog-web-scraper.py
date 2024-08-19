@@ -8,14 +8,7 @@ from selenium.webdriver.support import expected_conditions as EC
 
 import pandas as pd
 
-
-
-
-"Optional Headless bot"
-options = Options()
-options.headless = True
-
-browser = webdriver.Firefox(options = options)
+browser = webdriver.Firefox()
 data = []
 
 def extract_images():
@@ -49,8 +42,8 @@ def extract_hidden_fields():
     return output
 
 def extract_all_details():
-    wait_to_load = WebDriverWait(browser, 5).until(EC.presence_of_element_located((By.XPATH,"//h1[@class='h4']")))
-    wait_to_load2 = myElem = WebDriverWait(browser, 5).until(EC.presence_of_element_located((By.XPATH,"//span[@class = 'number']")))
+    WebDriverWait(browser, 5).until(EC.presence_of_element_located((By.XPATH,"//h1[@class='h4']")))
+    WebDriverWait(browser, 5).until(EC.presence_of_element_located((By.XPATH,"//span[@class = 'number']")))
     product_title = browser.find_element(By.XPATH,"//h1[@class='h4']").text
     display_price = float(browser.find_element(By.XPATH,"//span[@class = 'number']").text.split('$')[1])
     retail_price = float(browser.find_element(By.XPATH,"//div[@class = 'product-single-retail']").text.split('$')[1])
@@ -94,19 +87,13 @@ def scrape_elements(product_code):
     print('Exctracting for product:',str(product_code))
     available_options = [item.text for item in browser.find_elements(By.XPATH,"//span[contains(@class,'js-sku-set meta-item meta-item-text is-not-empty')]")]
     if len(available_options) <=1 :
-        try:
-            data_entry = extract_all_details()
-            data.append(data_entry)
-        except Exception as Err:
-            print(Err)
+        data_entry = extract_all_details()
+        data.append(data_entry)
     else:
         for option in available_options:
             button = browser.find_element(By.XPATH,f"//span[contains(@data-title,'{option}')]").click()
-            try:
-                data_entry = extract_all_details()
-                data.append(data_entry)
-            except Exception as Err:
-                print(Err)
+            data_entry = extract_all_details()
+            data.append(data_entry)
         return
     
 
