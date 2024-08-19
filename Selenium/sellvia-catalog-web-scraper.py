@@ -66,17 +66,18 @@ def extract_all_details():
     else:
         stock = 'No'
 
+    "Identifying Options"
     [Type,Size,Color] = ['Type','Size','Color']
-    available_options = [Type,Size,Color]
-    for i in range(len(available_options)):
-        if len(browser.find_elements(By.XPATH,f"//div[@class='name' and (contains(text(),'{available_options[i]}'))]")) == 1:
-            element_containing_option=browser.find_element(By.XPATH,f"//div[@class='name' and contains(text(),'{available_options[i]}')]")
-            available_options[i] = element_containing_option.find_element(By.XPATH,".//span[@style = 'margin: 0px 0px 0px 5px;']").text
+    feature_options = [Type,Size,Color]
+    for i in range(len(feature_options)):
+        if len(browser.find_elements(By.XPATH,f"//div[@class='name' and (contains(text(),'{feature_options[i]}'))]")) == 1:
+            element_containing_option=browser.find_element(By.XPATH,f"//div[@class='name' and contains(text(),'{feature_options[i]}')]")
+            feature_options[i] = element_containing_option.find_element(By.XPATH,".//span[@style = 'margin: 0px 0px 0px 5px;']").text
         else:
-            available_options[i] = ''
+            feature_options[i] = ''
 
     "We're assuming all prices are considered in USD ($) for the entire website"
-    row = [product_title,description,display_price,retail_price,processing_time,shipping_and_handling,available_options[0],available_options[1],available_options[2]]
+    row = [product_title,description,display_price,retail_price,processing_time,shipping_and_handling,feature_options[0],feature_options[1],feature_options[2]]
     row +=image_list
 
 
