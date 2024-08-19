@@ -66,9 +66,12 @@ def extract_all_details():
         stock = 'No'
 
     if len(browser.find_elements(By.XPATH,"//div[@class='name' and (contains(text(),'Type'))]")) == 1:
-        type = browser.find_element(By.XPATH,"//span[@style = 'margin: 0px 0px 0px 5px;']").text
+        element_containing_type=browser.find_element(By.XPATH,"//div[@class='name' and contains(text(),'Type')]")
+        type = element_containing_type.find_element(By.XPATH,".//span[@style = 'margin: 0px 0px 0px 5px;']").text
+        print(type)
     else:
         type = ''
+
     
     if len(browser.find_elements(By.XPATH,"//div[@class='name' and (contains(text(),'Size') or contains(text(),'Color'))]")) == 2:
         [size,color] = [item.text for item in browser.find_elements(By.XPATH,"//span[@style='margin: 0px 0px 0px 5px;']")]
@@ -98,8 +101,7 @@ def extract_all_details():
         
     hidden_fields = extract_hidden_fields()
     row += hidden_fields
-    for x,item in enumerate(row):
-        print(x,':',item)
+    # print(len(row))
     return row
 
 def scrape_elements(product_code):
@@ -112,6 +114,7 @@ def scrape_elements(product_code):
         for option in available_options:
             button = browser.find_element(By.XPATH,f"//span[contains(@data-title,'{option}')]").click()
             data_entry = extract_all_details()
+            data.append(data_entry)
         return
     
 
