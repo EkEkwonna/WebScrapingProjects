@@ -12,18 +12,18 @@ browser = webdriver.Firefox()
 data = []
 
 def extract_images():
-    image_array=[]
-    first_image = browser.find_element(By.XPATH,"//img[@class='makezoom']").get_attribute('data-zoom-image')
-    image_array.append(first_image)
+    image_array=set()
+    first_image = browser.find_element(By.XPATH,"//img[@class='makezoom']").get_attribute('src')
+    image_array.add(first_image)
     current_image = 0
     for i in range(15):
         browser.find_element(By.XPATH,"//div[@class='slider-next']").click()
         current_image = browser.find_element(By.XPATH,"//img[@class='makezoom']").get_attribute('src')
         if current_image != first_image:
-            image_array.append(current_image)
+            image_array.add(current_image)
         else:
             break
-    return image_array
+    return list(image_array)
 
 def extract_hidden_fields():
     output = []
@@ -44,11 +44,11 @@ def extract_hidden_fields():
     return output
 
 def extract_all_details():
-    WebDriverWait(browser, 5).until(EC.presence_of_element_located((By.XPATH,"//h1[@class='h4']")))
-    WebDriverWait(browser, 5).until(EC.presence_of_element_located((By.XPATH,"//span[@class = 'number']")))
+    WebDriverWait(browser, 100).until(EC.presence_of_element_located((By.XPATH,"//h1[@class='h4']")))
+    WebDriverWait(browser, 100).until(EC.presence_of_element_located((By.XPATH,"//span[@class = 'number']")))
     product_title = browser.find_element(By.XPATH,"//h1[@class='h4']").text
-    display_price = float(browser.find_element(By.XPATH,"//span[@class = 'number']").text.split('$')[1])
-    retail_price = float(browser.find_element(By.XPATH,"//div[@class = 'product-single-retail']").text.split('$')[1])
+    display_price = browser.find_element(By.XPATH,"//span[@class = 'number']").text
+    retail_price = browser.find_element(By.XPATH,"//div[@class = 'product-single-retail']").text
 
     description = browser.find_element(By.XPATH,"//div[@class='wrap-content']").text
     image_list = extract_images()
@@ -56,6 +56,7 @@ def extract_all_details():
     shipping_and_handling = float(browser.find_element(By.XPATH,"//span[@class = 'js-sku-shipping-price']").text.split('$')[1])
         
     "Checking Stock Levels"
+    WebDriverWait(browser, 100).until(EC.presence_of_element_located((By.XPATH,"//div[@class='stock']")))
     if browser.find_element(By.XPATH,"//div[@class='stock']").text == 'In Stock':
         stock = 'Yes'
     else:
@@ -67,7 +68,10 @@ def extract_all_details():
     for i in range(len(feature_options)):
         if len(browser.find_elements(By.XPATH,f"//div[@class='name' and (contains(text(),'{feature_options[i]}'))]")) == 1:
             element_containing_option=browser.find_element(By.XPATH,f"//div[@class='name' and contains(text(),'{feature_options[i]}')]")
-            feature_options[i] = element_containing_option.find_element(By.XPATH,".//span[@style = 'margin: 0px 0px 0px 5px;']").text
+            if element_containing_option.find_elements(By.XPATH,".//span[@style = 'margin: 0px 0px 0px 5px;']") !=[]:
+                feature_options[i] = element_containing_option.find_element(By.XPATH,".//span[@style = 'margin: 0px 0px 0px 5px;']").text
+            else:
+                feature_options[i] = ''
         else:
             feature_options[i] = ''
 
@@ -91,12 +95,14 @@ def scrape_elements(product_code):
     available_options2 = [item.get_attribute('title') for item in browser.find_elements(By.XPATH,"//img[@class = 'img-responsive']")]
     if len(available_options) >=2:
         for option in available_options:
+            WebDriverWait(browser, 100).until(EC.element_to_be_clickable((By.XPATH,f"//span[contains(@data-title,'{option}')]")))
             button = browser.find_element(By.XPATH,f"//span[contains(@data-title,'{option}')]").click()
             data_entry = extract_all_details()
             data.append(data_entry)
         return
     if len(available_options2) >=2:
         for option in available_options2:
+            WebDriverWait(browser, 100).until(EC.element_to_be_clickable((By.XPATH,f"//img[@class = 'img-responsive' and contains(@title,'{option}')]")))
             button = browser.find_element(By.XPATH,f"//img[@class = 'img-responsive' and contains(@title,'{option}')]").click()
             data_entry = extract_all_details()
             data.append(data_entry)
@@ -105,13 +111,14 @@ def scrape_elements(product_code):
         data.append(data_entry)
     
 
-for item in range(1659989,1659982,-1):
+for item in range(1659981,1659970,-1):
     try:
         scrape_elements(item)
     except Exception as Err:
-        print(Err)
+        print(item,':Error')
         continue
 
+print(len(data),' rows collected')
 df=pd.DataFrame(data,columns=['Title','Description','Display Price USD($)','Retail Price USD($)','Processing Time','Shipping and Handling USD ($)','Type','Size','Color',
                               'Image_1','Image_2','Image_3','Image_4','Image_5','Image_6','Image_7','Image_8','Image_9','Image_10',
                               'Image_11','Image_12','Image_13','Image_14','Image_15',
@@ -122,4 +129,3 @@ df=pd.DataFrame(data,columns=['Title','Description','Display Price USD($)','Reta
 
 df.to_csv('sellvia-catalog-products.csv',index=False)
 print('CSV created under sellvia-catalog-products.csv')
-
