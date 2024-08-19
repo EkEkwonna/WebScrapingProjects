@@ -16,11 +16,13 @@ def extract_images():
     first_image = browser.find_element(By.XPATH,"//img[@class='makezoom']").get_attribute('data-zoom-image')
     image_array.append(first_image)
     current_image = 0
-    while current_image != first_image:
+    for i in range(15):
         browser.find_element(By.XPATH,"//div[@class='slider-next']").click()
         current_image = browser.find_element(By.XPATH,"//img[@class='makezoom']").get_attribute('src')
         if current_image != first_image:
             image_array.append(current_image)
+        else:
+            break
     return image_array
 
 def extract_hidden_fields():
@@ -86,19 +88,29 @@ def scrape_elements(product_code):
     browser.get(f'https://sellviacatalog.com/product/{str(product_code)}')
     print('Exctracting for product:',str(product_code))
     available_options = [item.text for item in browser.find_elements(By.XPATH,"//span[contains(@class,'js-sku-set meta-item meta-item-text is-not-empty')]")]
-    if len(available_options) <=1 :
-        data_entry = extract_all_details()
-        data.append(data_entry)
-    else:
+    available_options2 = [item.get_attribute('title') for item in browser.find_elements(By.XPATH,"//img[@class = 'img-responsive']")]
+    if len(available_options) >=2:
         for option in available_options:
             button = browser.find_element(By.XPATH,f"//span[contains(@data-title,'{option}')]").click()
             data_entry = extract_all_details()
             data.append(data_entry)
         return
+    if len(available_options2) >=2:
+        for option in available_options2:
+            button = browser.find_element(By.XPATH,f"//img[@class = 'img-responsive' and contains(@title,'{option}')]").click()
+            data_entry = extract_all_details()
+            data.append(data_entry)
+    else:
+        data_entry = extract_all_details()
+        data.append(data_entry)
     
 
-for item in range(1660119,1660110,-1):
-    scrape_elements(item)
+for item in range(1659989,1659982,-1):
+    try:
+        scrape_elements(item)
+    except Exception as Err:
+        print(Err)
+        continue
 
 df=pd.DataFrame(data,columns=['Title','Description','Display Price USD($)','Retail Price USD($)','Processing Time','Shipping and Handling USD ($)','Type','Size','Color',
                               'Image_1','Image_2','Image_3','Image_4','Image_5','Image_6','Image_7','Image_8','Image_9','Image_10',
