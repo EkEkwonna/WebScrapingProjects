@@ -68,7 +68,6 @@ def extract_all_details():
     if len(browser.find_elements(By.XPATH,"//div[@class='name' and (contains(text(),'Type'))]")) == 1:
         element_containing_type=browser.find_element(By.XPATH,"//div[@class='name' and contains(text(),'Type')]")
         type = element_containing_type.find_element(By.XPATH,".//span[@style = 'margin: 0px 0px 0px 5px;']").text
-        print(type)
     else:
         type = ''
 
