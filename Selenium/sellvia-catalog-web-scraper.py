@@ -49,7 +49,8 @@ def extract_hidden_fields():
     return output
 
 def extract_all_details():
- 
+    wait_to_load = WebDriverWait(browser, 5).until(EC.presence_of_element_located((By.XPATH,"//h1[@class='h4']")))
+    wait_to_load2 = myElem = WebDriverWait(browser, 5).until(EC.presence_of_element_located((By.XPATH,"//span[@class = 'number']")))
     product_title = browser.find_element(By.XPATH,"//h1[@class='h4']").text
     display_price = float(browser.find_element(By.XPATH,"//span[@class = 'number']").text.split('$')[1])
     retail_price = float(browser.find_element(By.XPATH,"//div[@class = 'product-single-retail']").text.split('$')[1])
@@ -65,32 +66,17 @@ def extract_all_details():
     else:
         stock = 'No'
 
-    if len(browser.find_elements(By.XPATH,"//div[@class='name' and (contains(text(),'Type'))]")) == 1:
-        element_containing_type=browser.find_element(By.XPATH,"//div[@class='name' and contains(text(),'Type')]")
-        type = element_containing_type.find_element(By.XPATH,".//span[@style = 'margin: 0px 0px 0px 5px;']").text
-    else:
-        type = ''
-
-    
-    if len(browser.find_elements(By.XPATH,"//div[@class='name' and (contains(text(),'Size') or contains(text(),'Color'))]")) == 2:
-        [size,color] = [item.text for item in browser.find_elements(By.XPATH,"//span[@style='margin: 0px 0px 0px 5px;']")]
-
-    elif len(browser.find_elements(By.XPATH,"//div[@class='name' and (contains(text(),'Size') or contains(text(),'Color'))]")) == 1:
-        size_or_color = browser.find_element(By.XPATH,"//div[@class='name' and (contains(text(),'Size') or contains(text(),'Color'))]").text.split(':')[0]
-        if size_or_color == 'Color':
-            color = browser.find_element(By.XPATH,"//div[@class='name' and (contains(text(),'Size') or contains(text(),'Color'))]").text.split(':')[1]
-            size = ''
-            
+    [Type,Size,Color] = ['Type','Size','Color']
+    available_options = [Type,Size,Color]
+    for i in range(len(available_options)):
+        if len(browser.find_elements(By.XPATH,f"//div[@class='name' and (contains(text(),'{available_options[i]}'))]")) == 1:
+            element_containing_option=browser.find_element(By.XPATH,f"//div[@class='name' and contains(text(),'{available_options[i]}')]")
+            available_options[i] = element_containing_option.find_element(By.XPATH,".//span[@style = 'margin: 0px 0px 0px 5px;']").text
         else:
-            size = browser.find_element(By.XPATH,"//div[@class='name' and (contains(text(),'Size') or contains(text(),'Color'))]").text.split(':')[1]
-            color = ''
-
-    else:
-        size = ''
-        color = ''
+            available_options[i] = ''
 
     "We're assuming all prices are considered in USD ($) for the entire website"
-    row = [product_title,description,display_price,retail_price,processing_time,shipping_and_handling,size,color,type]
+    row = [product_title,description,display_price,retail_price,processing_time,shipping_and_handling,available_options[0],available_options[1],available_options[2]]
     row +=image_list
 
 
@@ -100,11 +86,11 @@ def extract_all_details():
         
     hidden_fields = extract_hidden_fields()
     row += hidden_fields
-    # print(len(row))
     return row
 
 def scrape_elements(product_code):
     browser.get(f'https://sellviacatalog.com/product/{str(product_code)}')
+    print('Exctracting for product:',str(product_code))
     available_options = [item.text for item in browser.find_elements(By.XPATH,"//span[contains(@class,'js-sku-set meta-item meta-item-text is-not-empty')]")]
     if len(available_options) <=1 :
         data_entry = extract_all_details()
@@ -114,13 +100,14 @@ def scrape_elements(product_code):
             button = browser.find_element(By.XPATH,f"//span[contains(@data-title,'{option}')]").click()
             data_entry = extract_all_details()
             data.append(data_entry)
+
         return
     
 
 for item in range(1660119,1660110,-1):
     scrape_elements(item)
 
-df=pd.DataFrame(data,columns=['Title','Description','Display Price USD($)','Retail Price USD($)','Processing Time','Shipping and Handling USD ($)','Size','Color','Type',
+df=pd.DataFrame(data,columns=['Title','Description','Display Price USD($)','Retail Price USD($)','Processing Time','Shipping and Handling USD ($)','Type','Size','Color',
                               'Image_1','Image_2','Image_3','Image_4','Image_5','Image_6','Image_7','Image_8','Image_9','Image_10',
                               'Image_11','Image_12','Image_13','Image_14','Image_15',
                               'Processing Time','In Stock',
@@ -129,5 +116,5 @@ df=pd.DataFrame(data,columns=['Title','Description','Display Price USD($)','Reta
                                 'price','salePrice','save','single_shipping_price','currency_shipping','variation_default','shipping','sku-meta','sku-meta-set[]'])
 
 df.to_csv('sellvia-catalog-products.csv',index=False)
-
+print('CSV created under sellvia-catalog-products.csv')
 
