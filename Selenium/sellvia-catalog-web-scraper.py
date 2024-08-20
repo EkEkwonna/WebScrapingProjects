@@ -52,7 +52,6 @@ def extract_all_details():
     product_title = browser.find_element(By.XPATH,"//h1[@class='h4']").text
     display_price = browser.find_element(By.XPATH,"//span[@class = 'number']").text
     retail_price = browser.find_element(By.XPATH,"//div[@class = 'product-single-retail']").text
-
     description = browser.find_element(By.XPATH,"//div[@class='wrap-content']").text
     image_list = extract_images()
     processing_time = browser.find_element(By.XPATH,"//div[@class='single-shipping_title']").text.split(': ')[1]
@@ -122,7 +121,7 @@ def scrape_elements(product_code):
         if len(available_options) >=2:
             for option in available_options:
                 WebDriverWait(browser, 100).until(EC.element_to_be_clickable((By.XPATH,f"//span[contains(@data-title,'{option}')]")))
-                button = browser.find_element(By.XPATH,f"//span[contains(@data-title,'{option}')]").click()
+                button = browser.find_element(By.XPATH,f"//span[@data-title='{option}']").click()
                 data_entry = extract_all_details()
                 data.append(data_entry)
             return
@@ -136,13 +135,14 @@ def scrape_elements(product_code):
             data_entry = extract_all_details()
             data.append(data_entry)
     
-
-for item in range(1660000,1659900,-1):
-    try:
-        scrape_elements(item)
-    except Exception as Err:
-        print(item,':Error')
-        continue
+for item in [1659905,1659922,1659956]:
+    scrape_elements(item)
+# for item in range(1660000,1659900,-1):
+#     try:
+#         scrape_elements(item)
+#     except Exception as Err:
+#         print(item,':Error')
+#         continue
 
 print(len(data),' rows collected')
 df=pd.DataFrame(data,columns=['Title','Description','Display Price USD($)','Retail Price USD($)','Processing Time','Shipping and Handling USD ($)','Type','Size','Color',
