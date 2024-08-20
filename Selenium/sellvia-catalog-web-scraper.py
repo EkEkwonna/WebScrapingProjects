@@ -135,14 +135,13 @@ def scrape_elements(product_code):
             data_entry = extract_all_details()
             data.append(data_entry)
     
-for item in [1659905,1659922,1659956]:
-    scrape_elements(item)
-# for item in range(1660000,1659900,-1):
-#     try:
-#         scrape_elements(item)
-#     except Exception as Err:
-#         print(item,':Error')
-#         continue
+
+for item in range(1660000,1659900,-1):
+    try:
+        scrape_elements(item)
+    except Exception as Err:
+        print(item,':Error')
+        continue
 
 print(len(data),' rows collected')
 df=pd.DataFrame(data,columns=['Title','Description','Display Price USD($)','Retail Price USD($)','Processing Time','Shipping and Handling USD ($)','Type','Size','Color',
