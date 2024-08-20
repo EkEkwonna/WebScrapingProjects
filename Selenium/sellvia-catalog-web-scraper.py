@@ -136,11 +136,11 @@ def scrape_elements(product_code):
             data.append(data_entry)
     
 
-for item in range(1660000,1659900,-1):
+for item in range(1659920,1659900,-1):
     try:
         scrape_elements(item)
     except Exception as Err:
-        print(item,':Error')
+        # print(item,':Error')
         continue
 
 print(len(data),' rows collected')
