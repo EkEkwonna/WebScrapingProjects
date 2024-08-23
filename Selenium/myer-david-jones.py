@@ -48,19 +48,6 @@ def extract_myer_details():
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 "==========================================================="
 "Initiating Webscraping"
 
