@@ -21,8 +21,6 @@ data = []
 def check_product(element_type,field,attribute_detail):
     WebDriverWait(browser,20).until(EC.presence_of_element_located((By.XPATH,f"//{element_type}[@{field} = '{attribute_detail}']")))
     if browser.find_elements(By.XPATH,f"//{element_type}[@{field} = '{attribute_detail}']") != []:
-        print(browser.find_element(By.XPATH,f"//{element_type}[@{field} = '{attribute_detail}']").text)
-        print("--------------------------------------------")
         return browser.find_element(By.XPATH,f"//{element_type}[@{field} = '{attribute_detail}']").text
     else:
         return ''
@@ -30,8 +28,6 @@ def check_product(element_type,field,attribute_detail):
 def extract_description():
     if check_product('button','class','css-1l1iq20') != '':
         browser.find_element(By.XPATH,"//button[@class = 'css-1l1iq20']").click()
-        print(browser.find_element(By.XPATH,"//div[@data-automation= 'product-description-container']").text  )
-        print("--------------------------------------------")
         return browser.find_element(By.XPATH,"//div[@data-automation= 'product-description-container']").text  
     else:
         return ''
