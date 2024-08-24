@@ -16,11 +16,11 @@ browser.execute_script("document.body.style.zoom='5%'")
 data = []
 
 def extract_images():
-    image_array=set()
+    image_array=[]
     first_image = browser.find_element(By.XPATH,"//img[@class='makezoom']").get_attribute('src')
     if first_image[9:] == '-full.jpg':
         first_image = first_image[:9]
-    image_array.add(first_image)
+    image_array.append(first_image)
     current_image = 0
     for i in range(15):
         browser.find_element(By.XPATH,"//div[@class='slider-next']").click()
@@ -28,11 +28,11 @@ def extract_images():
         if current_image[9:] == '-full.jpg':
             current_image = current_image[:9]
         if current_image != first_image:
-            image_array.add(current_image)
+            image_array.append(current_image)
         else:
             break
     
-    return list(image_array)
+    return image_array
 
 def extract_hidden_fields():
     output = []
@@ -89,19 +89,17 @@ def extract_all_details():
     "We're assuming all prices are considered in USD ($) for the entire website"
     row = [product_title,description,display_price,retail_price,processing_time,shipping_and_handling,feature_options[0],feature_options[1],feature_options[2]]
 
-    if len(data)!=0:
-        print('previous:',data[len(data)-1][6:9])
-        print('current',feature_options[0:])
-        
     "If the only change between 2 adjecent rows is colour only first picture is extracted"
     if len(data) !=0 and data[len(data)-1][0] == product_title and  data[len(data)-1][8]!=feature_options[2] and data[len(data)-1][7]==feature_options[1] and data[len(data)-1][6]==feature_options[0]:
         print('saving only first image')
         image_list = [image_list[0]]
-
     "If we have 2 adjecent rows with the same product title and either change in Size or change in Type no pictures selected"
     if len(data) !=0 and data[len(data)-1][0] == product_title and  data[len(data)-1][8]==feature_options[2] and  (data[len(data)-1][7]!=feature_options[1] or data[len(data)-1][6]!=feature_options[0]):
         print('saving no images')
         image_list = ['']
+    else:
+        image_list = list(set(image_list))
+
     
     row +=image_list
 
@@ -193,6 +191,7 @@ for item in range(1659930,1659920,-1):
     except Exception as Err:
         print(item,':Error')
         continue
+
 
 print(len(data),' rows collected')
 df=pd.DataFrame(data,columns=['Title','Description','Display Price USD($)','Retail Price USD($)','Processing Time','Shipping and Handling USD ($)','Type','Size','Color',
