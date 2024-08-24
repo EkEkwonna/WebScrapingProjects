@@ -88,15 +88,32 @@ def extract_all_details():
 
     "We're assuming all prices are considered in USD ($) for the entire website"
     row = [product_title,description,display_price,retail_price,processing_time,shipping_and_handling,feature_options[0],feature_options[1],feature_options[2]]
-    row +=image_list
 
+    if len(data)!=0:
+        print('previous:',data[len(data)-1][6:9])
+        print('current',feature_options[0:])
+        
+    "If the only change between 2 adjecent rows is colour only first picture is extracted"
+    if len(data) !=0 and data[len(data)-1][0] == product_title and  data[len(data)-1][8]!=feature_options[2] and data[len(data)-1][7]==feature_options[1] and data[len(data)-1][6]==feature_options[0]:
+        print('saving only first image')
+        image_list = [image_list[0]]
+
+    "If we have 2 adjecent rows with the same product title and either change in Size or change in Type no pictures selected"
+    if len(data) !=0 and data[len(data)-1][0] == product_title and  data[len(data)-1][8]==feature_options[2] and  (data[len(data)-1][7]!=feature_options[1] or data[len(data)-1][6]!=feature_options[0]):
+        print('saving no images')
+        image_list = ['']
+    
+    row +=image_list
 
     for i in range(15 - len(image_list)):
         row.append('')
+
+    
     row += [processing_time,stock]
         
     hidden_fields = extract_hidden_fields()
     row += hidden_fields
+    print(row)
     return row
 
 def scrape_elements(product_code):
@@ -170,7 +187,7 @@ def scrape_elements(product_code):
             data.append(data_entry)
     
 
-for item in range(1659905,1659900,-1):
+for item in range(1659930,1659920,-1):
     try:
         scrape_elements(item)
     except Exception as Err:
