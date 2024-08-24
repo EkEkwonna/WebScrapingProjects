@@ -26,10 +26,6 @@ def check_product(element_type,field,attribute_detail):
         output = browser.find_element(By.XPATH,f"//{element_type}[@{field} = '{attribute_detail}']").text 
         return output
     else:
-        # print('=========NOT WORKING=========')
-        # print(browser.current_url)
-        # print(f"//{element_type}[@{field} = '{attribute_detail}']")
-        # print('=========NOT WORKING=========')
         return ''
 
 def extract_description():

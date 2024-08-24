@@ -17,11 +17,15 @@ data = []
 def extract_images():
     image_array=set()
     first_image = browser.find_element(By.XPATH,"//img[@class='makezoom']").get_attribute('src')
+    if first_image[-10:] == '-full.jpeg':
+        first_image = first_image[:-10]
     image_array.add(first_image)
     current_image = 0
     for i in range(15):
         browser.find_element(By.XPATH,"//div[@class='slider-next']").click()
         current_image = browser.find_element(By.XPATH,"//img[@class='makezoom']").get_attribute('src')
+        if current_image[-10:] == '-full.jpeg':
+            current_image = current_image[:-10]
         if current_image != first_image:
             image_array.add(current_image)
         else:
@@ -95,21 +99,47 @@ def extract_all_details():
 
 def scrape_elements(product_code):
     browser.get(f'https://sellviacatalog.com/product/{str(product_code)}')
+    print('\n')
+    print('=====================================')
     print('Exctracting for product:',str(product_code))
     
     "Testing for 2 ranges of available options"
+    "One range is images and second is text"
+    "Word options"
+    word_options = [item.text for item in browser.find_elements(By.XPATH,"//span[contains(@class,'js-sku-set meta-item meta-item-text is-not-empty')]")]
+    "Image options"
+    image_options = [item.get_attribute('title') for item in browser.find_elements(By.XPATH,"//img[@class = 'img-responsive']")]
+    print('word options:',word_options,'image options:',image_options)
+    if len(browser.find_elements(By.XPATH,"//div[@class='value']")) ==2:
+        if word_options!=[] and image_options !=[] and word_options[0]!='':
+            first_range_of_options = image_options
+            second_range_of_options = word_options
+            for first_section_option in first_range_of_options:
+                for second_section_option in second_range_of_options:
+                    WebDriverWait(browser, 100).until(EC.element_to_be_clickable((By.XPATH,f"//span[contains(@data-title,'{first_section_option}')]")))
+                    button1 = browser.find_element(By.XPATH,f"//img[@title='{first_section_option}']").click()
+                    print(first_section_option,' selected')
+                    WebDriverWait(browser, 100).until(EC.element_to_be_clickable((By.XPATH,f"//span[contains(@data-title,'{second_section_option}')]")))
+                    button2 = browser.find_element(By.XPATH,f"//span[@data-title='{second_section_option}']").click()
+                    print(second_section_option,' selected')
+                    data_entry = extract_all_details()
+                    data.append(data_entry)    
+
+    "Both ranges of available options are text"
     if len(browser.find_elements(By.XPATH,"//div[@class='value']")) ==2:
         if browser.find_element(By.XPATH,"//div[@class='value']")!=[]:
             first_section=browser.find_element(By.XPATH,"//div[@class='value']")
             first_range_of_options = [item.text for item in first_section.find_elements(By.XPATH,".//span[contains(@class,'js-sku-set meta-item meta-item-text is-not-empty')]")]
             second_section=browser.find_elements(By.XPATH,"//div[@class='value']")[1]
             second_range_of_options = [item.text for item in second_section.find_elements(By.XPATH,".//span[contains(@class,'js-sku-set meta-item meta-item-text is-not-empty')]")]
-            for first_section_optoin in first_range_of_options:
+            for first_section_option in first_range_of_options:
                 for second_section_option in second_range_of_options:
-                    WebDriverWait(browser, 100).until(EC.element_to_be_clickable((By.XPATH,f"//span[contains(@data-title,'{first_section_optoin}')]")))
-                    button1 = browser.find_element(By.XPATH,f"//span[@data-title='{first_section_optoin}']").click()
+                    WebDriverWait(browser, 100).until(EC.element_to_be_clickable((By.XPATH,f"//span[contains(@data-title,'{first_section_option}')]")))
+                    button1 = browser.find_element(By.XPATH,f"//span[@data-title='{first_section_option}']").click()
+                    print(first_section_option,' selected')
                     WebDriverWait(browser, 100).until(EC.element_to_be_clickable((By.XPATH,f"//span[contains(@data-title,'{second_section_option}')]")))
                     button2 = browser.find_element(By.XPATH,f"//span[@data-title='{second_section_option}']").click()
+                    print(second_section_option,' selected')
                     data_entry = extract_all_details()
                     data.append(data_entry)    
     else:
@@ -122,6 +152,7 @@ def scrape_elements(product_code):
             for option in available_options:
                 WebDriverWait(browser, 100).until(EC.element_to_be_clickable((By.XPATH,f"//span[contains(@data-title,'{option}')]")))
                 button = browser.find_element(By.XPATH,f"//span[@data-title='{option}']").click()
+                print(option,' selected')
                 data_entry = extract_all_details()
                 data.append(data_entry)
             return
@@ -129,6 +160,7 @@ def scrape_elements(product_code):
             for option in available_options2:
                 WebDriverWait(browser, 100).until(EC.element_to_be_clickable((By.XPATH,f"//img[@class = 'img-responsive' and contains(@title,'{option}')]")))
                 button = browser.find_element(By.XPATH,f"//img[@class = 'img-responsive' and contains(@title,'{option}')]").click()
+                print(option,' selected')
                 data_entry = extract_all_details()
                 data.append(data_entry)
         else:
@@ -140,7 +172,7 @@ for item in range(1659920,1659900,-1):
     try:
         scrape_elements(item)
     except Exception as Err:
-        # print(item,':Error')
+        print(item,':Error')
         continue
 
 print(len(data),' rows collected')
