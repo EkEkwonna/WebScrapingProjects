@@ -7,6 +7,7 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions as EC
 
 import pandas as pd
+
 options = Options()
 options.headless = False
 browser = webdriver.Firefox(options=options)
@@ -17,19 +18,20 @@ data = []
 def extract_images():
     image_array=set()
     first_image = browser.find_element(By.XPATH,"//img[@class='makezoom']").get_attribute('src')
-    if first_image[-10:] == '-full.jpeg':
-        first_image = first_image[:-10]
+    if first_image[9:] == '-full.jpg':
+        first_image = first_image[:9]
     image_array.add(first_image)
     current_image = 0
     for i in range(15):
         browser.find_element(By.XPATH,"//div[@class='slider-next']").click()
         current_image = browser.find_element(By.XPATH,"//img[@class='makezoom']").get_attribute('src')
-        if current_image[-10:] == '-full.jpeg':
-            current_image = current_image[:-10]
+        if current_image[9:] == '-full.jpg':
+            current_image = current_image[:9]
         if current_image != first_image:
             image_array.add(current_image)
         else:
             break
+    
     return list(image_array)
 
 def extract_hidden_fields():
