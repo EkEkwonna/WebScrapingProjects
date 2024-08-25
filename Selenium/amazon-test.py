@@ -25,8 +25,16 @@ def check_product(element_type,field,attribute_detail):
         return ''
     
 def extract_images():
-    # left_container = browser.find_element(By.XPATH,"//ul[@class = 'a-unordered-list a-nostyle a-button-list a-vertical a-spacing-top-micro regularAltImageViewLayout']")
-    image_array = [image.get_attribute('src') for image in browser.find_elements(By.XPATH,"//ul[@class = 'a-unordered-list a-nostyle a-button-list a-vertical a-spacing-top-micro regularAltImageViewLayout']//img")]
+    image_array  = []
+    for i in range(len(browser.find_elements(By.XPATH,"//ul[@class = 'a-unordered-list a-nostyle a-button-list a-vertical a-spacing-top-micro regularAltImageViewLayout']//input[@class='a-button-input']")[2:])):
+        print('length:',len(browser.find_elements(By.XPATH,"//ul[@class = 'a-unordered-list a-nostyle a-button-list a-vertical a-spacing-top-micro regularAltImageViewLayout']//input[@class='a-button-input']")[2:]))
+        print(i)
+        button = browser.find_elements(By.XPATH,"//ul[@class = 'a-unordered-list a-nostyle a-button-list a-vertical a-spacing-top-micro regularAltImageViewLayout']//input[@class='a-button-input']")[i]
+        button.click()
+        if browser.find_elements(By.XPATH,"//div[@class = 'imgTagWrapper']//img[@src]") != []:
+            current_image = browser.find_element(By.XPATH,"//div[@class = 'imgTagWrapper']//img[@src]").get_attribute('data-old-hires')
+            if current_image not in image_array:
+                image_array.append(current_image)
     return image_array
 
 
