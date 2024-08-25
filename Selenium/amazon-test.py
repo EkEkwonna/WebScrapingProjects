@@ -36,21 +36,22 @@ def extract_images():
     image_array  = []
     print('Extracting images')
     buttons =  browser.find_elements(By.XPATH,"//ul[contains(@class, 'a-unordered-list a-nostyle a-button-list a-vertical a-spacing-top-micro')]//input[@class='a-button-input']")
+    first_image = browser.find_element(By.XPATH,"//img[@id = 'landingImage']").get_attribute('src')
+    image_array.append(first_image)
     for i in range(len(buttons)):                         
-        print(i)
+        # print(i)
         button = browser.find_elements(By.XPATH,"//ul[contains(@class, 'a-unordered-list a-nostyle a-button-list a-vertical a-spacing-top-micro')]//input[@class='a-button-input']")[i]
         if button.is_displayed():     
             hover = ActionChains(browser).move_to_element(button)
             hover.perform()
             button.click()
-            dynamic_image_list = browser.find_elements(By.XPATH,"//img[@class = 'a-dynamic-image']")
-            for image in dynamic_image_list:
-                if image.is_displayed():
-                    current_image = image.get_attribute('src')
-                    print(current_image)
-                    if current_image not in image_array:
-                        image_array.append(current_image)
-    return list(set(image_array))
+            test_list = [image.get_attribute('src') for image in browser.find_elements(By.XPATH,"//img[@class = 'a-dynamic-image']")]
+            image_array += test_list
+
+    image_extraction = list(set(image_array))
+    # print(image_extraction)
+    print('lenght of image list:',len(image_extraction))
+    return image_extraction
 
 
 def extract_all_details():
@@ -86,7 +87,7 @@ def extract_all_details():
     for i in range(10 - len(image_list)):
         row.append('')
    
-    print(row)
+    # print(row)
     return row
 
 def scrape_elements(product_code):
@@ -99,14 +100,13 @@ def scrape_elements(product_code):
 
     
 ASIN_LIST = ['B07MXF4G8K','B08BXBCNMQ','B07BRK1PW4','B07GDLCQXV','B07XSCCZYG','B08MVFKGJM',
-             'B01DJLKZBA','B07XSCD2R4','B0BMXYPFTK','B0CN6SLBGD','B093R5F5PF']
+             'B01DJLKZBA','B07XSCD2R4','B0BMXYPFTK','B0CN6SLBGD']
 for item in ASIN_LIST:
-    # try:
-    #     scrape_elements(item)
-    # except Exception as Err:
-    #     print(item,':Error')
-    #     continue
-    scrape_elements(item)
+    try:
+        scrape_elements(item)
+    except Exception as Err:
+        print(item,':Error')
+        continue
 
 
 print(len(data),' rows collected')
