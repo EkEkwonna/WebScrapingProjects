@@ -5,7 +5,7 @@ from selenium.webdriver.firefox.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions as EC
-
+from selenium.webdriver.common.action_chains import ActionChains
 import pandas as pd
 
 options = Options()
@@ -15,7 +15,7 @@ browser.fullscreen_window()
 browser.execute_script("document.body.style.zoom='5%'")
 data = []
 
-def check_product(element_type,field,attribute_detail):
+def check_element(element_type,field,attribute_detail):
     WebDriverWait(browser,100000).until(EC.presence_of_element_located((By.XPATH,f"//{element_type}[@{field} = '{attribute_detail}']")))
     if browser.find_elements(By.XPATH,f"//{element_type}[@{field} = '{attribute_detail}']") != []:
         WebDriverWait(browser,100000).until(EC.presence_of_element_located((By.XPATH,f"//{element_type}[@{field} = '{attribute_detail}']")))
@@ -24,49 +24,62 @@ def check_product(element_type,field,attribute_detail):
     else:
         return ''
     
+def check_product(element_type,field,attribute_detail):
+    if browser.find_elements(By.XPATH,f"//{element_type}[{field} = '{attribute_detail}']")!=[]:
+        return check_element(element_type,field,attribute_detail) 
+    else:
+        return ''
+
+
+
 def extract_images():
     image_array  = []
-    for i in range(len(browser.find_elements(By.XPATH,"//ul[@class = 'a-unordered-list a-nostyle a-button-list a-vertical a-spacing-top-micro regularAltImageViewLayout']//input[@class='a-button-input']")[2:])):
-        print('length:',len(browser.find_elements(By.XPATH,"//ul[@class = 'a-unordered-list a-nostyle a-button-list a-vertical a-spacing-top-micro regularAltImageViewLayout']//input[@class='a-button-input']")[2:]))
+    print('Extracting images')
+    buttons =  browser.find_elements(By.XPATH,"//ul[contains(@class, 'a-unordered-list a-nostyle a-button-list a-vertical a-spacing-top-micro')]//input[@class='a-button-input']")
+    for i in range(len(buttons)):                         
         print(i)
-        button = browser.find_elements(By.XPATH,"//ul[@class = 'a-unordered-list a-nostyle a-button-list a-vertical a-spacing-top-micro regularAltImageViewLayout']//input[@class='a-button-input']")[i]
-        button.click()
-        if browser.find_elements(By.XPATH,"//div[@class = 'imgTagWrapper']//img[@src]") != []:
-            current_image = browser.find_element(By.XPATH,"//div[@class = 'imgTagWrapper']//img[@src]").get_attribute('data-old-hires')
-            if current_image not in image_array:
-                image_array.append(current_image)
-    return image_array
+        button = browser.find_elements(By.XPATH,"//ul[contains(@class, 'a-unordered-list a-nostyle a-button-list a-vertical a-spacing-top-micro')]//input[@class='a-button-input']")[i]
+        if button.is_displayed():     
+            hover = ActionChains(browser).move_to_element(button)
+            hover.perform()
+            button.click()
+            dynamic_image_list = browser.find_elements(By.XPATH,"//img[@class = 'a-dynamic-image']")
+            for image in dynamic_image_list:
+                if image.is_displayed():
+                    current_image = image.get_attribute('src')
+                    print(current_image)
+                    if current_image not in image_array:
+                        image_array.append(current_image)
+    return list(set(image_array))
 
 
 def extract_all_details():
-    Title = check_product('span','id','productTitle')
-    Description = check_product('ul','class','a-unordered-list a-vertical a-spacing-mini')
-    Display_price = check_product('span','class','a-price-whole') + '.' + check_product('span','class','a-price-fraction')
-    if browser.find_elements(By.XPATH,"//span[data-csa-c-type = 'element']")!=[]: 
-        processing_time = check_product('span','data-csa-c-type','element')
-    else:
-        processing_time = 'Currenlty Unavailable'
-    "Chanded Country to Canada so Shipping and Import Charges "
+    Title = check_element('span','id','productTitle')
+    Description = check_element('ul','class','a-unordered-list a-vertical a-spacing-mini')
+    Display_price = check_element('span','class','a-price-whole') + '.' + check_element('span','class','a-price-fraction')
+    processing_time = check_product('span','data-csa-c-type','element')
     if browser.find_elements(By.XPATH,"//div[@class='a-section a-spacing-none a-padding-none']") != []:
-        # product_info_box = browser.find_element(By.XPATH,"//div[@class='a-section a-spacing-none a-padding-none']")
         Shipping_charge = browser.find_element(By.XPATH,"//div[@class='a-section a-spacing-none a-padding-none']//span[@class = 'a-size-base a-color-secondary']").text
     else:
         Shipping_charge = ''   
     Stock = check_product('div','id','availability')
 
     "Identifying selection"
-    attributes = ['size','color']
+    attributes = ['size','color','style']
     Size = ''
     Color = ''
+    Style = ''
     for attribute in attributes:
         if browser.find_elements(By.XPATH,f"//div[@id = 'variation_{attribute}_name']")!= []:
-            # attribute_container = browser.find_element(By.XPATH,f"//div[@id = 'variation_{attribute}_name']")
+            WebDriverWait(browser,10000).until(EC.presence_of_element_located((By.XPATH,f"//div[@id = 'variation_{attribute}_name']")))
             if attribute == 'size':
                 Size = browser.find_element(By.XPATH,f"//div[@id = 'variation_{attribute}_name']//span[@class = 'selection']").text
             if attribute == 'color':
                 Color = browser.find_element(By.XPATH,f"//div[@id = 'variation_{attribute}_name']//span[@class = 'selection']").text
+            if attribute == 'style':
+                Style = browser.find_element(By.XPATH,f"//div[@id = 'variation_{attribute}_name']//span[@class = 'selection']").text
 
-    row = [Title,Description,Display_price,processing_time,Shipping_charge,Stock,Color,Size]
+    row = [Title,Description,Display_price,processing_time,Shipping_charge,Stock,Color,Size,Style]
     image_list = extract_images()
     row += image_list
     
@@ -85,9 +98,8 @@ def scrape_elements(product_code):
     
 
     
-ASIN_LIST = ['B07BRK1PW4','B07GDLCQXV','B07XSCCZYG','B08MVFKGJM','B01DJLKZBA','B07XSCD2R4',
-             'B07H515VCZ','B08BXBCNMQ','B0B9K44XTS','B07QZLHTTY','B01HIATG6I','B07QXD3J9G',
-             'B081JDHNX1','B07DMBG7CX','B0B2X1BDFH','B07MXF4G8K']
+ASIN_LIST = ['B07MXF4G8K','B08BXBCNMQ','B07BRK1PW4','B07GDLCQXV','B07XSCCZYG','B08MVFKGJM',
+             'B01DJLKZBA','B07XSCD2R4','B0BMXYPFTK','B0CN6SLBGD','B093R5F5PF']
 for item in ASIN_LIST:
     # try:
     #     scrape_elements(item)
@@ -98,7 +110,7 @@ for item in ASIN_LIST:
 
 
 print(len(data),' rows collected')
-df=pd.DataFrame(data,columns=['Title','Description','Display Price','Fastest Delivery Date','Shipping Charge','Stock','Color','Size',
+df=pd.DataFrame(data,columns=['Title','Description','Display Price','Fastest Delivery Date','Shipping Charge','Stock','Color','Size','Style',
                               'Image_1','Image_2','Image_3','Image_4','Image_5','Image_6','Image_6','Image_7','Image_8','Image_9','Image_10'])
 df.to_csv('amazon-test.csv',index=False)
 print('CSV created under sellvia-catalog-products.csv')
