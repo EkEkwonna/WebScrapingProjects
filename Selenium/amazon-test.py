@@ -35,12 +35,14 @@ def check_product(element_type,field,attribute_detail):
 def extract_images():
     image_array  = []
     print('Extracting images')
-    buttons =  browser.find_elements(By.XPATH,"//ul[contains(@class, 'a-unordered-list a-nostyle a-button-list a-vertical a-spacing-top-micro')]//input[@class='a-button-input']")
-    first_image = browser.find_element(By.XPATH,"//img[@id = 'landingImage']").get_attribute('src')
-    image_array.append(first_image)
-    for i in range(len(buttons)):                         
-        # print(i)
-        button = browser.find_elements(By.XPATH,"//ul[contains(@class, 'a-unordered-list a-nostyle a-button-list a-vertical a-spacing-top-micro')]//input[@class='a-button-input']")[i]
+    browser.implicitly_wait(2)
+    buttons_ids = [button.get_attribute('data-csa-c-id') for button in  browser.find_elements(By.XPATH,"//ul[contains(@class, 'a-unordered-list a-nostyle a-button-list a-vertical a-spacing-top-micro')]//li[@data-csa-c-id]") if button.get_attribute('data-csa-c-id') != None]
+    print(buttons_ids)
+    # if browser.find_elements(By.XPATH,"//img[@id = 'landingImage']") !=[]:
+    #     first_image = browser.find_element(By.XPATH,"//img[@id = 'landingImage']").get_attribute('src')
+    #     image_array.append(first_image)
+    for button in buttons_ids:                         
+        button = browser.find_element(By.XPATH,f"//li[@data-csa-c-id = '{button}']")
         if button.is_displayed():     
             hover = ActionChains(browser).move_to_element(button)
             hover.perform()
@@ -49,7 +51,7 @@ def extract_images():
             image_array += test_list
 
     image_extraction = list(set(image_array))
-    # print(image_extraction)
+    print(image_extraction)
     print('lenght of image list:',len(image_extraction))
     return image_extraction
 
@@ -87,7 +89,7 @@ def extract_all_details():
     for i in range(8 - len(image_list)):
         row.append('')
    
-    # print(row)
+    print(row)
     return row
 
 def scrape_elements():
@@ -116,8 +118,8 @@ for item in ASIN_LIST:
         print(section_options)
         for section_option in section_options:
             if section_option[1] == 'swatchAvailable':
-                WebDriverWait(browser,100).until(EC.presence_of_element_located((By.XPATH,f"//il[@id ='{section_option[0]}']")))
-                browser.find_element(By.XPATH,f"//il[@id ='{section_option[0]}']").click()
+                WebDriverWait(browser,100).until(EC.presence_of_element_located((By.XPATH,f"//li[@id ='{section_option[0]}']")))
+                browser.find_element(By.XPATH,f"//li[@id ='{section_option[0]}']").click()
                 scrape_elements()
 
     if len(available_options_sections) == 3:
@@ -125,15 +127,15 @@ for item in ASIN_LIST:
         first_section_options = [(list_item.get_attribute('id'),list_item.get_attribute('class')) for list_item in first_section.find_elements(By.XPATH,".//li")]
         print("First Section",first_section_options)
         for first_section_item in first_section_options:
-            WebDriverWait(browser,100).until(EC.presence_of_element_located((By.XPATH,f"//il[@id ='{first_section_item[0]}']")))
-            browser.find_element(By.XPATH,f"//il[@id ='{first_section_item[0]}']").click()
+            WebDriverWait(browser,100).until(EC.presence_of_element_located((By.XPATH,f"//li[@id ='{first_section_item[0]}']")))
+            browser.find_element(By.XPATH,f"//li[@id ='{first_section_item[0]}']").click()
             second_section = browser.find_elements(By.XPATH,"//div[@id = 'centerCol']//ul[contains(@class,'a-unordered-list')]")[1]
             second_section_options = [(list_item.get_attribute('id'),list_item.get_attribute('class')) for list_item in second_section.find_elements(By.XPATH,".//li")]
             print('Second Section',second_section_options)
-            for second_section_option in second_section:
+            for second_section_option in second_section_options:
                 if second_section_option[1] == 'swatchAvailable':
-                    WebDriverWait(browser,100).until(EC.presence_of_element_located(By.XPATH,f"//il[@id = '{second_section[0]}']"))
-                    browser.find_element(By.XPATH,f"//il[@id = '{second_section[0]}']").click()
+                    WebDriverWait(browser,100).until(EC.presence_of_element_located((By.XPATH,f"//li[@id = '{second_section_option[0]}']")))
+                    browser.find_element(By.XPATH,f"//li[@id = '{second_section_option[0]}']").click()
                     scrape_elements()
 
     if len(available_options_sections) ==4:
@@ -141,22 +143,22 @@ for item in ASIN_LIST:
         first_section_options = [(list_item.get_attribute('id'),list_item.get_attribute('class')) for list_item in first_section.find_elements(By.XPATH,".//li")]
         print("First Section",first_section_options)
         for first_section_item in first_section_options:
-            WebDriverWait(browser,100).until(EC.presence_of_element_located(By.XPATH,f"//il[@id ='{first_section_item[0]}']"))
-            browser.find_element(By.XPATH,f"//il[@id ='{first_section_item[0]}']").click()
+            WebDriverWait(browser,100).until(EC.presence_of_element_located((By.XPATH,f"//li[@id ='{first_section_item[0]}']")))
+            browser.find_element(By.XPATH,f"//li[@id ='{first_section_item[0]}']").click()
             second_section = browser.find_elements(By.XPATH,"//div[@id = 'centerCol']//ul[contains(@class,'a-unordered-list')]")[1]
             second_section_options = [(list_item.get_attribute('id'),list_item.get_attribute('class')) for list_item in second_section.find_elements(By.XPATH,".//li")]
             print('Second Section',second_section_options)
-            for second_section_option in second_section:
+            for second_section_option in second_section_options:
                 if second_section_option[1] == 'swatchAvailable':
-                    WebDriverWait(browser,100).until(EC.presence_of_element_located(By.XPATH,f"//il[@id = '{second_section[0]}']"))
-                    browser.find_element(By.XPATH,f"//il[@id = '{second_section[0]}']").click()
+                    WebDriverWait(browser,100).until(EC.presence_of_element_located((By.XPATH,f"//li[@id = '{second_section[0]}']")))
+                    browser.find_element(By.XPATH,f"//li[@id = '{second_section_option[0]}']").click()
                     third_section = browser.find_elements(By.XPATH,"//div[@id = 'centerCol']//ul[contains(@class,'a-unordered-list')]")[2]
                     third_section_options = [(list_item.get_attribute('id'),list_item.get_attribute('class')) for list_item in third_section.find_elements(By.XPATH,".//li")]
                     print('Third Section',second_section_options)
-                    for third_section_item in third_section:
-                        if third_section_item[1]  == 'swatchAvailable':
-                            WebDriverWait(browser,100).until(EC.presence_of_element_located(By.XPATH,f"//il[@id = '{third_section[0]}']"))
-                            browser.find_element(By.XPATH,f"//il[@id = '{third_section[0]}']").click()
+                    for third_section_option in third_section_options:
+                        if third_section_option[1]  == 'swatchAvailable':
+                            WebDriverWait(browser,100).until(EC.presence_of_element_located((By.XPATH,f"//li[@id = '{third_section_option[0]}']")))
+                            browser.find_element(By.XPATH,f"//li[@id = '{third_section_option[0]}']").click()
                             scrape_elements()
     else:
         scrape_elements(item)
