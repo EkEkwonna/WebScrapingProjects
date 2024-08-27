@@ -84,7 +84,7 @@ def extract_all_details():
     image_list = extract_images()
     row += image_list
     
-    for i in range(10 - len(image_list)):
+    for i in range(8 - len(image_list)):
         row.append('')
    
     # print(row)
@@ -95,7 +95,7 @@ def scrape_elements(product_code):
     print('\n')
     print('=====================================')
     print('Exctracting for product:',str(product_code))
-    extract_all_details()
+    data.append(extract_all_details())
     
 
     
@@ -111,6 +111,6 @@ for item in ASIN_LIST:
 
 print(len(data),' rows collected')
 df=pd.DataFrame(data,columns=['Title','Description','Display Price','Fastest Delivery Date','Shipping Charge','Stock','Color','Size','Style',
-                              'Image_1','Image_2','Image_3','Image_4','Image_5','Image_6','Image_6','Image_7','Image_8','Image_9','Image_10'])
+                              'Image_1','Image_2','Image_3','Image_4','Image_5','Image_6','Image_6','Image_7'])
 df.to_csv('amazon-test.csv',index=False)
 print('CSV created under sellvia-catalog-products.csv')
