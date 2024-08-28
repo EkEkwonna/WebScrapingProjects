@@ -65,7 +65,7 @@ def extract_images():
     return image_extraction
 
 def extract_all_details(attribute_dimensions):
-    ASIN_VALUE = browser.current_url.split('?')[0].split('www.amazon.com/dp/')[1]
+    ASIN_VALUE = browser.current_url.split('www.amazon.com/dp/')[1].split('?')[0].split('/')[0]
     Title = check_element('span','id','productTitle')
     Description = check_element('ul','class','a-unordered-list a-vertical a-spacing-mini')
     processing_time = check_product('span','data-csa-c-type','element')
@@ -204,9 +204,6 @@ for item in ASIN_LIST:
 
 
 print(len(data),' rows collected')
-for data_row in data: 
-    print(len(data_row))
-
 
 df=pd.DataFrame(data,columns=['ASIN','Title','Description','Display Price','Fastest Delivery Date','Shipping Charge','Stock','Color','Size','Style',
                               'Image_1','Image_2','Image_3','Image_4','Image_5','Image_6','Image_7','Image_8','Image_9'])
