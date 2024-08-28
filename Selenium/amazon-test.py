@@ -46,12 +46,17 @@ def extract_images():
     """
     time.sleep(random_delay())
 
-    thumbnail_ids = [thumbnail.get_attribute('data-csa-c-posy') for thumbnail in browser.find_elements(By.XPATH,"//ul[contains(@class, 'a-unordered-list a-nostyle a-button-list a-vertical a-spacing-top-micro')]//li[@data-csa-c-posy and contains(@class,'imageThumbnail')]")]
+
+    thumbnail_ids = [thumbnail.get_attribute('data-csa-c-posy') for thumbnail in browser.find_elements(By.XPATH,"//ul[contains(@class, 'a-unordered-list a-nostyle a-button-list a-vertical')]//li[@data-csa-c-posy and contains(@class,'imageThumbnail')]")]
     for thumbnail_ID in thumbnail_ids:
         current_thumbnail = browser.find_element(By.XPATH,f"//li[@data-csa-c-posy = '{thumbnail_ID}']")
         if current_thumbnail.is_displayed():
             current_thumbnail.click()
-            test_list = [image.get_attribute('src') for image in browser.find_elements(By.XPATH,"//img[@class = 'a-dynamic-image']") if image.is_displayed()]
+            if browser.find_elements(By.XPATH,"//i[@class='a-icon a-icon-close']") !=[] and browser.find_element(By.XPATH,"//i[@class='a-icon a-icon-close']").is_displayed() :
+                time.sleep(random_delay())
+                browser.find_element(By.XPATH,"//i[@class='a-icon a-icon-close']").click()
+
+            test_list = [image.get_attribute('src') for image in browser.find_elements(By.XPATH,"//img[contains(@class, 'a-dynamic-image')]") if (image.is_displayed() and image.get_attribute('src')[:26] == 'https://m.media-amazon.com')]
             image_array += test_list
     
     image_extraction = list(set(image_array))
@@ -85,14 +90,20 @@ def extract_images1():
 
 
 def extract_all_details(attribute_dimensions):
+    ASIN_VALUE = browser.current_url.split('?')[0].split('www.amazon.com/dp/')[1]
     Title = check_element('span','id','productTitle')
     Description = check_element('ul','class','a-unordered-list a-vertical a-spacing-mini')
-    Display_price = check_element('span','class','a-price-whole') + '.' + check_element('span','class','a-price-fraction')
     processing_time = check_product('span','data-csa-c-type','element')
     image_test = extract_images()
-    
+    Display_price = ''
     if browser.find_elements(By.XPATH,"//div[@class='a-section a-spacing-none a-padding-none']") != []:
-        Shipping_charge = browser.find_element(By.XPATH,"//div[@class='a-section a-spacing-none a-padding-none']//span[@class = 'a-size-base a-color-secondary']").text
+        if browser.find_elements(By.XPATH,"//div[@class='a-section a-spacing-none a-padding-none']//span[@class = 'a-price-whole']") != []:
+            Display_price = browser.find_element(By.XPATH,"//div[@class='a-section a-spacing-none a-padding-none']//span[@class = 'a-price-whole']").text + '.' + browser.find_element(By.XPATH,"//div[@class='a-section a-spacing-none a-padding-none']//span[@class = 'a-price-fraction']").text
+
+        if browser.find_elements(By.XPATH,"//div[@class='a-section a-spacing-none a-padding-none']//span[@class = 'a-size-base a-color-secondary']") != []:
+            Shipping_charge = browser.find_element(By.XPATH,"//div[@class='a-section a-spacing-none a-padding-none']//span[@class = 'a-size-base a-color-secondary']").text
+        else:
+            Shipping_charge = 'N/A' + browser.find_element(By.XPATH,"//div[@class='a-section a-spacing-none a-padding-none']//span[@class = 'a-color-error']").text
     else:
         Shipping_charge = ''   
     Stock = check_product('div','id','availability')
@@ -113,21 +124,21 @@ def extract_all_details(attribute_dimensions):
                 Size = browser.find_element(By.XPATH,f"//div[@id = 'variation_{attribute}_name']//span[@class = 'selection']").text
             if attribute == 'color':
                 print('Extracting color')
+                WebDriverWait(browser,20).until(EC.presence_of_element_located((By.XPATH,f"//div[@id = 'variation_{attribute}_name']//span[@class = 'selection']")))
                 Color = browser.find_element(By.XPATH,f"//div[@id = 'variation_{attribute}_name']//span[@class = 'selection']").text
             if attribute == 'style':
                 print('Extracting style')
+                WebDriverWait(browser,20).until(EC.presence_of_element_located((By.XPATH,f"//div[@id = 'variation_{attribute}_name']//span[@class = 'selection']")))
                 Style = browser.find_element(By.XPATH,f"//div[@id = 'variation_{attribute}_name']//span[@class = 'selection']").text
 
-    if len(data) !=0 and data[len(data)-1][7]== Color and item == data[len(data)-1][0]:
-            image_list = ['']
-    else:
-        image_list = image_test
+    image_list = image_test
         
     if len(image_list) < 9:
         for i in range(9 - len(image_list)):
             image_list.append('')
+    print(len(image_list))
 
-    row = [item,Title,Description,Display_price,processing_time,Shipping_charge,Stock,Color,Size,Style]
+    row = [ASIN_VALUE,Title,Description,Display_price,processing_time,Shipping_charge,Stock,Color,Size,Style]
     "If we have 2 adjecent rows with the same product title and same color no pictures selected"
     if len(data)!= 0 :
         print("------------------------------------------")
@@ -141,20 +152,19 @@ def extract_all_details(attribute_dimensions):
     return row
 
 def scrape_elements(attribute_dimensions):
-    data.append(extract_all_details(attribute_dimensions))
+    try:
+        data.append(extract_all_details(attribute_dimensions))
+    except Exception as Err:
+        print(Err)
+    # data.append(extract_all_details(attribute_dimensions))
     
 
     
 ASIN_LIST = [
-    # 'B07MXF4G8K',
-    'B08BXBCNMQ','B07BRK1PW4','B07GDLCQXV','B07XSCCZYG','B08MVFKGJM',
-             'B01DJLKZBA','B07XSCD2R4','B0BMXYPFTK','B0CN6SLBGD']
+    # 'B07MXF4G8K','B08BXBCNMQ','B07BRK1PW4','B07GDLCQXV','B07XSCCZYG','B01DJLKZBA','B07XSCD2R4',
+    'B08MVFKGJM','B0032JUOU2','B0D7M3ZJ1Z','B0BMXYPFTK','B0CN6SLBGD'
+             ]
 for item in ASIN_LIST:
-    # try:
-    #     scrape_elements(item)
-    # except Exception as Err:
-    #     print(item,':Error')
-    #     continue
     browser.get(f'https://amazon.com/dp/{item}')
     print('\n')
     print('=====================================')
@@ -170,8 +180,8 @@ for item in ASIN_LIST:
             if section_option[1] != 'swatchUnavailable':
                 # WebDriverWait(browser,100).until(EC.presence_of_element_located((By.XPATH,f"//li[@id ='{section_option[0]}']")))
                 browser.find_element(By.XPATH,f"//li[@id ='{section_option[0]}']").click()
-                print('Attributes detected',attribute_dimensions)
-                attribute_dimensions = [section_option[0].split('_')[0]]    
+                attribute_dimensions = [section_option[0].split('_')[0]]
+                print('Attributes detected',attribute_dimensions)    
                 scrape_elements(attribute_dimensions)
 
     if len(available_options_sections) == 3:
@@ -213,7 +223,7 @@ for item in ASIN_LIST:
                     browser.find_element(By.XPATH,f"//li[@id = '{second_section_option[0]}']").click()
                     third_section = browser.find_elements(By.XPATH,"//div[@id = 'centerCol']//ul[contains(@class,'a-unordered-list')]")[2]
                     third_section_options = [(list_item.get_attribute('id'),list_item.get_attribute('class'),list_item.get_attribute('title').split('Click to select ')[1]) for list_item in third_section.find_elements(By.XPATH,".//li")]
-                    print('Third Section',second_section_options)
+                    print('Third Section',third_section_options)
                     for third_section_option in third_section_options:
                         if third_section_option[1]  != 'swatchUnavailable':
                             # WebDriverWait(browser,100).until(EC.presence_of_element_located((By.XPATH,f"//li[@id = '{third_section_option[0]}']")))
@@ -231,7 +241,11 @@ for item in ASIN_LIST:
 
 
 print(len(data),' rows collected')
+for data_row in data: 
+    print(len(data_row))
+
+
 df=pd.DataFrame(data,columns=['ASIN','Title','Description','Display Price','Fastest Delivery Date','Shipping Charge','Stock','Color','Size','Style',
-                              'Image_1','Image_2','Image_3','Image_4','Image_5','Image_6','Image_6','Image_7'])
+                              'Image_1','Image_2','Image_3','Image_4','Image_5','Image_6','Image_6','Image_7','Image_8','Image_9'])
 df.to_csv('amazon-test.csv',index=False)
 print('CSV created under sellvia-catalog-products.csv')
