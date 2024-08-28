@@ -62,7 +62,7 @@ def extract_images():
     return image_extraction
 
 
-def extract_all_details():
+def extract_all_details(attribute_dimensions):
     Title = check_element('span','id','productTitle')
     Description = check_element('ul','class','a-unordered-list a-vertical a-spacing-mini')
     Display_price = check_element('span','class','a-price-whole') + '.' + check_element('span','class','a-price-fraction')
@@ -74,20 +74,24 @@ def extract_all_details():
     Stock = check_product('div','id','availability')
 
     "Identifying selection"
-    attributes = ['size','color','style']
+    attribute_dimensions
     Size = ''
     Color = ''
     Style = ''
-    browser.refresh()
-    for attribute in attributes:
+    # browser.refresh()
+    for attribute in attribute_dimensions:
         if browser.find_elements(By.XPATH,f"//div[@id = 'variation_{attribute}_name']")!= []:
             # ActionChains(browser).move_to_element(browser.find_element(By.XPATH,f"//div[@id = 'variation_{attribute}_name']")).perform()
             # WebDriverWait(browser,100).until(EC.element_to_be_clickable((By.XPATH,f"//div[@id = 'variation_{attribute}_name']//span[@class = 'selection']")))
             if attribute == 'size':
+                print('Extracting size')
+                browser.refresh()
                 Size = browser.find_element(By.XPATH,f"//div[@id = 'variation_{attribute}_name']//span[@class = 'selection']").text
             if attribute == 'color':
+                print('Extracting Color')
                 Color = browser.find_element(By.XPATH,f"//div[@id = 'variation_{attribute}_name']//span[@class = 'selection']").text
             if attribute == 'style':
+                print('Extracting style')
                 Style = browser.find_element(By.XPATH,f"//div[@id = 'variation_{attribute}_name']//span[@class = 'selection']").text
 
     row = [item,Title,Description,Display_price,processing_time,Shipping_charge,Stock,Color,Size,Style]
@@ -112,8 +116,8 @@ def extract_all_details():
     print(row)
     return row
 
-def scrape_elements():
-    data.append(extract_all_details())
+def scrape_elements(attribute_dimensions):
+    data.append(extract_all_details(attribute_dimensions))
     
 
     
@@ -140,8 +144,8 @@ for item in ASIN_LIST:
             if section_option[1] != 'swatchUnavailable':
                 # WebDriverWait(browser,100).until(EC.presence_of_element_located((By.XPATH,f"//li[@id ='{section_option[0]}']")))
                 browser.find_element(By.XPATH,f"//li[@id ='{section_option[0]}']").click()
-                time.sleep(random_delay())
-                scrape_elements()
+                attribute_dimensions = [section_option.split('_')[0]]    
+                scrape_elements(attribute_dimensions)
 
     if len(available_options_sections) == 3:
         first_section = browser.find_element(By.XPATH,"//div[@id = 'centerCol']//ul[contains(@class,'a-unordered-list')]")
@@ -159,8 +163,8 @@ for item in ASIN_LIST:
                     element = browser.find_element(By.XPATH,f"//li[@id = '{second_section_option[0]}']")
                     ActionChains(browser).move_to_element(element).click().perform()
                     # browser.find_element(By.XPATH,f"//li[@id = '{second_section_option[0]}']").click()
-                    time.sleep(random_delay())
-                    scrape_elements()
+                    attribute_dimensions = [first_section_item.split('_')[0],second_section_option.split('_')[0]]
+                    scrape_elements(attribute_dimensions)
 
     if len(available_options_sections) ==4:
         first_section = browser.find_element(By.XPATH,"//div[@id = 'centerCol']//ul[contains(@class,'a-unordered-list')]")
@@ -183,10 +187,10 @@ for item in ASIN_LIST:
                         if third_section_option[1]  != 'swatchUnavailable':
                             # WebDriverWait(browser,100).until(EC.presence_of_element_located((By.XPATH,f"//li[@id = '{third_section_option[0]}']")))
                             browser.find_element(By.XPATH,f"//li[@id = '{third_section_option[0]}']").click()
-                            time.sleep(random_delay())
-                            scrape_elements()
+                            attribute_dimensions = [first_section_item.split('_')[0],second_section_option.split('_')[0],third_section_option.split('_')[0]]
+                            scrape_elements(attribute_dimensions)
     else:
-        scrape_elements(item)
+        scrape_elements()
         
             
 
