@@ -26,7 +26,7 @@ Once you get an output
 "Note headers contain cookie"
 
 import requests
-import Pandas as pd
+import pandas as pd
 
 "Unable to alter limit for some reason"
 
@@ -60,13 +60,13 @@ data = []
 while offset_value < Total_values:
     for product in response.json()['products']:
         "ID, Name, Current Price, Brand Name, ProductCode, Url , Image Url"
-        data.append([product['id'],product['name'],product['price']['current'],product['brandName'],product['productCode'],product['url'],product['imageUrl']])
+        data.append([product['id'],product['name'],product['price']['current']['value'],product['brandName'],product['productCode'],product['url'],product['imageUrl']])
         print('-----ADDING------')
-        print([product['id'],product['name'],product['price']['current'],product['brandName'],product['productCode'],product['url'],product['imageUrl']])
+        print([product['id'],product['name'],product['price']['current']['value'],product['brandName'],product['productCode'],product['url'],product['imageUrl']])
     offset_value += 72
 
 print('Data from ',len(data),' items has been collected')
 
-df = pd.DataFrame(data,columns = ['ID', 'Name', 'Current Price', 'Brand Name', 'ProductCode', 'Url' , 'Image Url'])
-df.to_csv('asos-trainers.csv')
+df = pd.DataFrame(data,columns = ['ID', 'Name', 'Current Price', 'Brand Name', 'ProductCode', 'Url' , 'Image Url']).drop_duplicates()
+df.to_csv('asos-trainers.csv',index = False)
 
