@@ -13,7 +13,7 @@ import pandas as pd
 
 
 options = Options()
-# options.add_argument('--headless=new')
+options.add_argument('--headless=new')
 browser = webdriver.Chrome( options=options)
 
 # options = Options()
@@ -46,7 +46,7 @@ TOTAL_NUMBER_OF_QUESTIONS = 981
 # TOTAL_NUMBER_OF_QUESTIONS = 10
 question_number = 1
 
-url = f'https://www.google.com/search?q=Amazon+AWS+Certified+Solutions+Architect+-+Associate+SAA-C03+Topic+1+question+{str(question_number)}'
+url = f'https://www.google.com/search?q=Amazon+AWS+Certified+Solutions+Architect+-+Associate+SAA-C03+Topic+1+question+{str(question_number)}+discussion'
 
 def random_delay():
     return random.randint(2,5)
@@ -71,14 +71,18 @@ def extract_question_and_answers():
         print(answer_[0], ' : ', answer_[1],'\n')
 
 
-for question in range(1,TOTAL_NUMBER_OF_QUESTIONS +1):
-    # time.sleep(random_delay())
-    browser.get(f'https://www.google.com/search?q=Amazon+AWS+Certified+Solutions+Architect+-+Associate+SAA-C03+Topic+1+question+{str(question_number)}')
-    if browser.find_elements(By.XPATH,"//div[@class = 'QS5gu sy4vM']") != []:
-        browser.find_element(By.XPATH,"//div[@class = 'QS5gu sy4vM']").click()
-    browser.find_element(By.XPATH,"//div[@class = 'dURPMd']//div").click()
-    extract_question_and_answers()
-    question_number +=1
+try:
+    for question in range(1,TOTAL_NUMBER_OF_QUESTIONS +1):
+        # time.sleep(random_delay())
+        browser.get(f'https://www.google.com/search?q=Amazon+AWS+Certified+Solutions+Architect+-+Associate+SAA-C03+Topic+1+question+{str(question_number)}')
+        if browser.find_elements(By.XPATH,"//div[@class = 'QS5gu sy4vM']") != []:
+            browser.find_element(By.XPATH,"//div[@class = 'QS5gu sy4vM']").click()
+        browser.find_element(By.XPATH,"//div[@class = 'dURPMd']//div").click()
+        extract_question_and_answers()
+        question_number +=1
+except Exception as e:
+    print( e)
+
 
 with open('CAA-CO3-Qs.json','w') as w:
     json.dumps(ALL_AMAZON_QUESTIONS,w)
