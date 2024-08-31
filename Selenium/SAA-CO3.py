@@ -7,14 +7,17 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions as EC
 
+"May need to incorporate a proxie rotating factor to avoid CAPCHA"
+
 import time
 import random
 import pandas as pd
 
 
 options = Options()
-options.add_argument('--headless=new')
+# options.add_argument('--headless=new')
 browser = webdriver.Chrome( options=options)
+
 
 # options = Options()
 # options.headless = False
@@ -42,8 +45,8 @@ Questions {
 
 
 ALL_AMAZON_QUESTIONS = {}
-TOTAL_NUMBER_OF_QUESTIONS = 981
-# TOTAL_NUMBER_OF_QUESTIONS = 10
+# TOTAL_NUMBER_OF_QUESTIONS = 981
+TOTAL_NUMBER_OF_QUESTIONS = 2
 question_number = 1
 
 url = f'https://www.google.com/search?q=Amazon+AWS+Certified+Solutions+Architect+-+Associate+SAA-C03+Topic+1+question+{str(question_number)}+discussion'
@@ -73,7 +76,7 @@ def extract_question_and_answers():
 
 try:
     for question in range(1,TOTAL_NUMBER_OF_QUESTIONS +1):
-        # time.sleep(random_delay())
+        time.sleep(random_delay())
         browser.get(f'https://www.google.com/search?q=Amazon+AWS+Certified+Solutions+Architect+-+Associate+SAA-C03+Topic+1+question+{str(question_number)}')
         if browser.find_elements(By.XPATH,"//div[@class = 'QS5gu sy4vM']") != []:
             browser.find_element(By.XPATH,"//div[@class = 'QS5gu sy4vM']").click()
@@ -85,4 +88,4 @@ except Exception as e:
 
 
 with open('CAA-CO3-Qs.json','w') as w:
-    json.dumps(ALL_AMAZON_QUESTIONS,w)
+    json.dumps(ALL_AMAZON_QUESTIONS)
