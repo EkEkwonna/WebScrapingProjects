@@ -67,5 +67,6 @@ while offset_value < Total_values:
 
 print('Data from ',len(data),' items has been collected')
 
-pd.DataFrame
+df = pd.DataFrame(data,columns = ['ID', 'Name', 'Current Price', 'Brand Name', 'ProductCode', 'Url' , 'Image Url'])
+df.to_csv('asos-trainers.csv')
 
