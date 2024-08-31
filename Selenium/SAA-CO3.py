@@ -1,8 +1,8 @@
 
 from selenium import webdriver
 from selenium.webdriver.common.by import By
-# from selenium.webdriver.firefox.options import Options
-from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.firefox.options import Options
+# from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions as EC
@@ -14,16 +14,16 @@ import random
 import pandas as pd
 
 
-options = Options()
-# options.add_argument('--headless=new')
-browser = webdriver.Chrome( options=options)
-
-
 # options = Options()
-# options.headless = False
-# browser = webdriver.Firefox(options=options)
-# browser.fullscreen_window()
-# browser.execute_script("document.body.style.zoom='5%'")
+# options.add_argument('--headless=new')
+# browser = webdriver.Chrome( options=options)
+
+
+options = Options()
+options.headless = True
+browser = webdriver.Firefox(options=options)
+browser.fullscreen_window()
+browser.execute_script("document.body.style.zoom='5%'")
 import json 
 
 """
@@ -45,8 +45,8 @@ Questions {
 
 
 ALL_AMAZON_QUESTIONS = {}
-# TOTAL_NUMBER_OF_QUESTIONS = 981
-TOTAL_NUMBER_OF_QUESTIONS = 2
+TOTAL_NUMBER_OF_QUESTIONS = 981
+# TOTAL_NUMBER_OF_QUESTIONS = 20
 question_number = 1
 
 url = f'https://www.google.com/search?q=Amazon+AWS+Certified+Solutions+Architect+-+Associate+SAA-C03+Topic+1+question+{str(question_number)}+discussion'
@@ -88,4 +88,4 @@ except Exception as e:
 
 
 with open('CAA-CO3-Qs.json','w') as w:
-    json.dumps(ALL_AMAZON_QUESTIONS)
+    json.dump(ALL_AMAZON_QUESTIONS,w,indent= 4)
