@@ -60,14 +60,14 @@ def extract_question_and_answers():
     # print('correct answer: \n',correct_answers)
     incorrect_answers = [(item.text,False) for item in browser.find_elements(By.XPATH,"//ul//li[@class = 'multi-choice-item']")]
     all_answers = correct_answers + incorrect_answers
-    print(all_answers)
+    # print(all_answers)
     ALL_AMAZON_QUESTIONS[f'QUESTION : {str(question_number)}'] = {'question': question ,
-                                                                  'answers' : [answer[0] for answer in all_answers],
+                                                                  'answers' : sorted([answer[0] for answer in all_answers]),
                                                                   'correct' : correct_answers}
     print(f'------QUESTION:{question_number} ------')
     print(question)
     print('---------ANSWERS-------')
-    for answer_ in all_answers:
+    for answer_ in sorted(all_answers):
         print(answer_[0], ' : ', answer_[1],'\n')
 
 
