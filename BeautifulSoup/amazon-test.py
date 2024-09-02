@@ -14,7 +14,7 @@ import time
 
 
 class Amazon_product:
-  def __init__(self,ASIN_VALUE,attribute_dimensions):
+  def __init__(self,ASIN_VALUE):
     response = requests.get(f'https://amazon.com/dp/{ASIN_VALUE}',headers= custom_headers)
     soup = BeautifulSoup(response.text,'lxml')
     print(response.status_code)
@@ -23,15 +23,29 @@ class Amazon_product:
     self.Description = soup.find('ul',class_='a-unordered-list a-vertical a-spacing-mini').text
     self.DisplayPrice = ''
     self.FastedDeliveryDate = ''
+    
+    if soup.find('div',class_='a-section a-spacing-none a-padding-none') != None :
+       if soup.soup.find('div',class_='a-section a-spacing-none a-padding-none').find('span',class_='a-price-whole') != None:
+            self.DisplayPrice = soup.find('div',class_='a-section a-spacing-none a-padding-none').find('span',class_='a-price-whole').text + '.' + soup.find('div',class_='a-section a-spacing-none a-padding-none').find('span',class_='a-price-fraction')
+       
+    
     if soup.find('div',class_='a-section a-spacing-none a-padding-none') !=None:
        self.ShippingCharge = soup.find('div',class_='a-section a-spacing-none a-padding-none').find('span',class_='a-size-base a-color-secondary').text
     else:
        self.ShippingCharge = soup.find('div',class_='a-section a-spacing-none a-padding-none').find('span',class_ = 'a-color-error').text
+    
     self.Stock = soup.select_one('#availability')
-    [self.Color]
-    self.Color = ''
-    self.Size = ''
-    self.Style = ''
+    [self.Color,self.Size ,self.Style] = ['','','']
+
+    for attribute in ['size','color','style']:
+       if soup(f'#variation_{attribute}_name') != None:
+            if attribute == 'size':
+                self.Size = soup.select_one(f'#variation_{attribute}_name').find('span',class_='selection').text
+            if attribute == 'color':
+                self.Color = soup.select_one(f'#variation_{attribute}_name').find('span',class_='selection').text
+            if attribute == 'style':
+                self.Style = soup.select_one(f'#variation_{attribute}_name').find('span',class_='selection').text
+
     self.Images = collect_images()
     self.row = [self.ASIN,self.Title,self.Description,self.DisplayPrice,self.FastedDeliveryDate,
                 self.ShippingCharge,self.Stock,self.Color, self.Size ,self.Style ,self.Images]
@@ -40,6 +54,8 @@ class Amazon_product:
            self.ShippingCharge ,self.Stock,self.Color, self.Size ,self.Style ,self.Images])
 
   def collect_images():
+    output_array.append(soup.select_one('#landingImage').Attributes.get('src'))
+
     output_array = []
     return output_array
 
