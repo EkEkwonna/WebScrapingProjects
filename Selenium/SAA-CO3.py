@@ -12,6 +12,7 @@ from selenium.webdriver.support import expected_conditions as EC
 import time
 import random
 import pandas as pd
+import requests
 
 
 # options = Options()
@@ -19,9 +20,10 @@ import pandas as pd
 # browser = webdriver.Chrome( options=options)
 
 
+
 options = Options()
 options.headless = True
-browser = webdriver.Firefox(options=options)
+browser = webdriver.Firefox(options = options)
 browser.fullscreen_window()
 browser.execute_script("document.body.style.zoom='5%'")
 import json 
@@ -51,6 +53,7 @@ question_number = 1
 
 url = f'https://www.google.com/search?q=Amazon+AWS+Certified+Solutions+Architect+-+Associate+SAA-C03+Topic+1+question+{str(question_number)}+discussion'
 
+
 def random_delay():
     return random.randint(2,5)
 
@@ -75,9 +78,11 @@ def extract_question_and_answers():
 
 
 try:
-    for question in range(1,TOTAL_NUMBER_OF_QUESTIONS +1):
-        time.sleep(random_delay())
+    for question_number in range(285,TOTAL_NUMBER_OF_QUESTIONS +1):
+        # time.sleep(random_delay())
         browser.get(f'https://www.google.com/search?q=Amazon+AWS+Certified+Solutions+Architect+-+Associate+SAA-C03+Topic+1+question+{str(question_number)}')
+        if browser.find_elements(By.XPATH,"//body[@style]") != []:
+            input('HAS CAPTCHA been solved?')
         if browser.find_elements(By.XPATH,"//div[@class = 'QS5gu sy4vM']") != []:
             browser.find_element(By.XPATH,"//div[@class = 'QS5gu sy4vM']").click()
         browser.find_element(By.XPATH,"//div[@class = 'dURPMd']//div").click()
@@ -87,5 +92,5 @@ except Exception as e:
     print( e)
 
 
-with open('CAA-CO3-Qs.json','w') as w:
+with open('CAA-CO3-Qs-2.json','w') as w:
     json.dump(ALL_AMAZON_QUESTIONS,w,indent= 4)
