@@ -22,9 +22,12 @@ class Amazon_product:
             self.DisplayPrice = soup.find('div',class_='a-section a-spacing-none a-padding-none').find('span',class_='a-price-whole').text.strip() + soup.find('div',class_='a-section a-spacing-none a-padding-none').find('span',class_='a-price-fraction').text.strip()
        
     
-    if soup.find('div',class_='a-section a-spacing-none a-padding-none') !=None and soup.find('div',class_='a-section a-spacing-none a-padding-none').find('span',class_='a-size-base a-color-secondary') != None:
+    if soup.find('div',class_='a-section a-spacing-none a-padding-none') !=None :
+      #  print('===============TRYING TO LOCATE SHIPPING CHARGE AND FASTEST DELIVERY DATE')
+      #  print(soup.find('div',class_='a-section a-spacing-none a-padding-none'))
        self.ShippingCharge = soup.find('div',class_='a-section a-spacing-none a-padding-none').find('span',class_='a-size-base a-color-secondary').text.strip()
        self.FastestDeliveryDate = soup.find('div',class_='a-section a-spacing-none a-padding-none').find('span',class_='a-text-bold').text.strip()
+      #  print(self.FastestDeliveryDate,self.ShippingCharge)
     else:
        self.ShippingCharge = soup.find('span',class_='a-color-price').text.strip()
        self.FastestDeliveryDate = 'N/A'
@@ -70,7 +73,8 @@ custom_headers = {'user-agent':'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) 
                   'Accept-Language':'en-GB,en-US;q=0.9,en;q=0.8'}
 
 ASIN_LIST = [
-    'B0C33B6H4Z'
+   #  'B0C33B6H4Z',
+    'B0BTK1C533'
     # 'B07MXF4G8K','B08BXBCNMQ','B07BRK1PW4','B07GDLCQXV','B07XSCCZYG','B01DJLKZBA','B07XSCD2R4','B08MVFKGJM','B0032JUOU2','B0D7M3ZJ1Z','B0BMXYPFTK','B0CN6SLBGD'
     ]
 
